@@ -1,0 +1,72 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.6.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-webflux')
+	compile('org.springframework.boot:spring-boot-starter-tomcat')
+	compileOnly('org.projectlombok:lombok:1.16.16')
+
+	// logbak
+	compile 'org.slf4j:slf4j-api:1.7.25'
+	compile 'org.slf4j:jcl-over-slf4j:1.7.25'
+	compile 'org.slf4j:log4j-over-slf4j:1.7.25'
+	compile 'ch.qos.logback:logback-classic:1.2.3'
+	compile 'ch.qos.logback:logback-core:1.2.3'
+
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+/* start sourceSets */
+String hostname = InetAddress.getLocalHost().getHostName().toLowerCase()
+if (hostname.endsWith(".local")) {
+	hostname = hostname.replace(".local", '')
+}
+
+sourceSets {
+	main.java.srcDirs = ['src/main/java']
+	test.java.srcDirs = ['src/test/java']
+	main.resources.srcDirs = ['src/main/resources', "src/main/resources-" + hostname]
+	test.resources.srcDirs = ['src/test/resources', "src/test/resources-" + hostname]
+}
+
+sourceSets.all {
+	set ->
+		set.allSource.srcDirs.each {
+			if (!it.exists()) {
+				it.mkdirs()
+			}
+		}
+}
+/* end sourceSets */
+
+/* start logs folder create */
+def logsDir = new File('logs')
+if (!logsDir.isDirectory()) {
+	logsDir.mkdirs()
+}
+/* end logs folder create */
